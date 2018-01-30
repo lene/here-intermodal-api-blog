@@ -27,8 +27,8 @@ So without further ado, let's show you how to implement a map using the HERE Int
 website.
 
 First of all, we will quickly show you how to set up the HERE Maps Javascript API. This post does not go into 
-details of the HERE Maps API, but if you find anything unclear, check out our 8-part in-depth tutorial for the
-HERE Maps Javascript API:
+details of how to use the HERE Maps API, but if you find anything unclear, check out our 8-part in-depth 
+tutorial for the HERE Maps Javascript API:
 * [Part 1: Basic Map Set-up](https://developer.here.com/blog/who-wants-ice-cream-a-here-maps-api-for-javascript-tutorial-part-1-basic-map-set-up) 
 * [Part 2: Geolocation](https://developer.here.com/blog/who-wants-ice-cream-a-here-maps-api-for-javascript-tutorial-part-2-geolocation) 
 * [Part 3: Basic Routing](https://developer.here.com/blog/who-wants-ice-cream-a-here-maps-api-for-javascript-tutorial-part-3-basic-routing) 
@@ -40,13 +40,24 @@ HERE Maps Javascript API:
 
 So, let's go! 
 
-Before you can work with any HERE API, you need to get yourself a pair of **credentials**. They consist of an 
-app id and an app code. You can get your own set of credentials by signing up on 
-[developer.here.com](http://developer.here.com). There's a 90 day free trial available that provides all of 
-our routing features, including the Intermodal Routing API < TODO LENE check if true >. If you have already signed
-up, you can access your credentials on your projects page.
+In this tutorial we will create a Javascript program that displays a map of Chicago and lets you select a 
+start point, from where a Park and Ride route to the HERE offices in Chicago is calculated. It should be easy 
+for you to choose a different destination, or extend the script so you can select both origin and destination
+for your journey freely. 
 
-Now that you have your HERE API credentials, you can go ahead and render a map:
+To work with any HERE API, you need to get yourself a pair of **credentials**. They consist of an app id and 
+an app code. You can get your own set of credentials by signing up on [developer.here.com](http://developer.here.com).
+After signing up for our account you create a new application to generate an app ID and an app code. If you 
+have already signed up, you can access your credentials on your projects page. 
+There's a 90-day Free Trial and also a free Public Plan available. Due to licensing issues, if you use one of 
+those, to use the Intermodal Routing API you must also contact the HERE Sales Team via the 
+[Contact Us](https://developer.here.com/contact-us) page and request < TODO that your application is enabled 
+for the Intermodal Routing API. Please state that you are not a public transit company in order to circumvent 
+the licensing restrictions. It should take no more than XXXX hours for your application to be allowed to use
+the Intermodal Routing API. > 
+
+
+Now that you have your HERE API credentials, you can go ahead and create a Javascript script to render a map:
 
 < TODO TORSTEN code setting up the map - something along the lines of: >
 ```javascript
