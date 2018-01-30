@@ -21,10 +21,10 @@ Please note that HERE is offering Park and Ride Routing only in specific locatio
 for currently supported cities. This list of supported cities is growing as we collect the necessary data for
 more and more destinations.
 
-## Down to business!
-
 So without further ado, let's show you how to implement a map using the HERE Intermodal Routing API on your
 website.
+
+## What you need
 
 First of all, we will quickly show you how to set up the HERE Maps Javascript API. This post does not go into 
 details of how to use the HERE Maps API, but if you find anything unclear, check out our 8-part in-depth 
@@ -56,7 +56,7 @@ that your application is enabled for the Intermodal Routing API. Please state th
 transit company in order to circumvent the licensing restrictions. It should take no more than XXXX hours for 
 your application to be allowed to use the Intermodal Routing API. >
 
-# Finally: some code!
+## Finally: some code!
 
 Now that you have your HERE API credentials, you can go ahead and create a Javascript script to render a map:
 
