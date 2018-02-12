@@ -1,0 +1,84 @@
+<html>
+<head>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-core.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-mapevents.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-service.js"></script>
+    <script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-ui.js"></script>
+    <script src="http://taser-dev.rnd.transit.api.here.com:8008/static/js/jquery.min.js"></script>
+    <script src="assets/tools.js"></script>
+</head>
+<body>
+</body>
+    <div id="map" style="height:800px"></div>
+
+    <script>
+        // FIXME: pass those keys as config?
+        var platform = new H.service.Platform({
+            useCIT: true,
+            app_id: 'DemoAppId01082013GAL',
+            app_code: 'AJKnXv84fjrb0KIHawS0Tg'
+        });
+        var maptypes = platform.createDefaultLayers();
+
+        var map = new H.Map(document.getElementById('map'), maptypes.terrain.map, {
+            zoom:2,
+            margin: 150,
+            renderBaseBackground: {lower: 1, higher: 1},
+//            pixelRatio: pixelRatio
+        });
+
+        var ui = H.ui.UI.createDefault(map, maptypes);
+        // aditional UI overview
+        var overview = new H.ui.Overview(maptypes.normal.transit, { scaleX: 6 });
+        ui.addControl('overview', overview);
+        // aditional UI ZoomRectangle
+        var zoomRect = new H.ui.ZoomRectangle();
+        ui.addControl('zoomrectangle', zoomRect);
+
+        // to add scaleBar left most at bottom right.
+        var scaleBar = ui.removeControl('scalebar');
+        ui.addControl("scalebar", scaleBar);
+
+        ui.addControl('distancemeasurement', new H.ui.DistanceMeasurement());
+
+        /* ADD MAPEVENTS AND BEHAVIOR*/
+        var mapevents = new H.mapevents.MapEvents(map);
+        var behavior = new H.mapevents.Behavior(mapevents);
+
+        // add resize support
+        function resizeMapContainer() {
+//            var $map = $(document.getElementById('map'));
+//            $map.height($(window).height() - $map.offset().top - 20);
+//            map.getViewPort().resize();
+        };
+//        window.addEventListener('resize', resizeMapContainer);
+//        resizeMapContainer();
+
+
+
+
+        var mobility = new H.Mobility({
+            map: map,
+            app_id: 'xWb5KmTI7pgCAFxf9d9P',
+            app_code: 'DNMfZLpeUUiLYolfwWKK9A'
+        });
+
+        var ui = mobility.createDefaultUI();
+
+        // https://developer.here.com/documentation/park-and-ride/topics/resource-routing-get.html
+
+        mobility.route({
+            dep: [41.994238,-88.728862],
+            arr: [41.844238,-87.638862],
+            time: '2018-02-01T07:30:00',
+            graph: 1,
+            maneuvers: 1
+        });
+
+
+
+//            "https://mobility.api.here.com/v1/route.json?accessId="+ACCESS_ID+"&profile=parkandride&dep=41.994238,-88.728862&arr=41.844238,-87.638862&time=2018-02-01T07:30:00&graph=1&maneuvers=1");
+
+    </script>
+
+</html>
