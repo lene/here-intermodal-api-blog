@@ -70,6 +70,7 @@ Of course, you must first create an HTML file to render you Javascript:
         <script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-service.js"></script>
         <script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-ui.js"></script>
         <script src="http://taser-dev.rnd.transit.api.here.com:8008/static/js/jquery.min.js"></script>
+        <script src="tools.js"></script>
     </head>
     
     <body>
@@ -91,7 +92,7 @@ var platform = new H.service.Platform({
 var maptypes = platform.createDefaultLayers();
 
 var map = new H.Map(document.getElementById('map'), maptypes.terrain.map, {
-    zoom: 10,
+    zoom: 9,
     center: { lat: 41.884238, lng: -87.638862 }
 });
 
@@ -103,15 +104,151 @@ var behavior = new H.mapevents.Behavior(mapevents);
 Now you have set up a HERE map, centered at the HERE Chicago offices, which are located at 41.884238 degrees
 North, 87.638862 West. (See? You have already learned something!) It should look approximately like this:
  
-< TODO TORSTEN here goes a screenshot of your beautiful map >
+![HERE Map centered on Chicago HERE office](https://deveo.in.here.com/api/blob?path=assets%2FHERE_map_bare.png&project_id=db99b593-8bec-4d6b-8844-bf54a047c112&repository_id=c669597b-1c49-4962-b03f-867ab531efdb&id=master&account_key=808a2d6fb2fb665cea48a52ecf1c2ae9&company_key=ac27767297dbdbe784acb2bf0805d820&plugin_key=3c94d47d6257ca0d3bc54a9b6a91aa64 "HERE Map centered on Chicago HERE office")
 
-Let's just very quickly add in some code to select a point on the map to start our route from:
+Since it is out of scope of this tutorial to explain how to process and render a route (the HERE Maps 
+Javascript API tutorial is covering that), I'll just give you some code which takes care of that.  
+Let's just very quickly add in some code to select a point on the map to start our route from. Copy it and
+save it to the file `tools.js`, which, you may have noticed, we are already including in the HTML file above:
+```javascript
+(function(NS) {
 
-< TODO TORSTEN code setting up the start point selector, and for simplicity's sake let's just hardcode the 
-destination to the Chicago HERE office, 41.884238/-87.638862 >
+    var ACCESS_ID = "bb072ce65aa1ad322c116b828fb1a226",
+        APP_ID: 'xWb5KmTI7pgCAFxf9d9P',
+        APP_CODE: 'DNMfZLpeUUiLYolfwWKK9A'
 
-Now that you have a start point and a destination, you are ready for the big moment already: Firing off a 
-request to the HERE Intermodal Routing API. The request will look like this:
+    function Mobility(options) {
+        this.map = options.map;
+    }
+
+    Mobility.prototype = {
+        on: function(name, handler) {
+            this._events = this._events || {};
+            this._events[name] = this._events[name] || [];
+            this._events[name].push(handler);
+        },
+        emit: function(name, arg1, arg2, arg3) {
+            var handlers = this._events && this._events[name] || [];
+            for (var i=0, l=handlers.length; i<l; i++) {
+                handlers[i].call(this, arg1, arg2, arg3);
+            };
+        },
+
+        route: function(params) {
+            var that = this;
+            var url = "https://mobility.api.here.com/v1/route.json?app_id="+APP_ID+"&app_code="+APP_CODE+"&profile=parkandride&dep="+params.dep.join(",")+"&arr="+params.arr.join(",")+"&time="+params.time+"&graph="+params.graph+"&maneuvers="+params.maneuvers;
+
+            $.get(url, function(resp) {
+                that.emit("response", resp);
+            });
+        },
+
+        createDefaultUI: function() {
+            new NS.ui.Logic(this);
+            new NS.ui.Route(this);
+            new NS.ui.Markers(this);
+        },
+
+    }
+
+
+    function Logic(provider) {
+        provider.on("response", function(resp) {
+            console.log(resp);
+            provider.emit("connection", resp.Res.Connections.Connection[0], resp.Res.Guidance && resp.Res.Guidance.Maneuvers);
+        });
+    }
+
+    function Route(provider) {
+        var that = this;
+        provider.on("connection", function(conn, maneuvers) {
+            var graphs = that._maneuversToGraphs(maneuvers);
+
+            conn.Sections.Sec.forEach(function(sec) {
+                var arr       = sec.Arr.Addr || sec.Arr.Stn,
+                    dep       = sec.Dep.Addr || sec.Dep.Stn,
+                    graph     = (graphs[sec.id] || sec.graph || "").split(" "),
+                    transport = sec.Dep.Transport || {},
+                    style     = NS.Mobility.routeStyles[sec.mode] || {},
+                    color     = (transport.At || {}).color || "black";
+
+                // Create a linestring to use as a point source for the route line
+                var linestring = new H.geo.LineString();
+                linestring.pushLatLngAlt(dep.y, dep.x);
+                for (var i=0, point; point=graph[i]; i++) {
+                    point = point.split(",");
+                    linestring.pushLatLngAlt(point[0], point[1]);
+                }
+                linestring.pushLatLngAlt(arr.y, arr.x);
+
+                // Create a polyline to display the route:
+                var routeLine = new H.map.Polyline(linestring, {
+                    style: { strokeColor: color || style.color, lineWidth: style.lineWidth || 7, lineDash: style.lineDash || [] },
+                });
+
+                // Add the route polyline and the two markers to the map:
+                map.addObjects([routeLine]);
+            });
+        });
+    }
+
+    Route.prototype._maneuversToGraphs = function(maneuvers) {
+        var graphs = {};
+        if (maneuvers) {
+            for (var i=0, maneuver; (maneuver=maneuvers[i]); i++) {
+                var graph = maneuver.Maneuver.reduce(function(acc, curr) {
+                    acc.push(curr.graph);
+                    return acc;
+                }, []).join(" ");
+                maneuver.sec_ids.split(" ").forEach(function(secId) {
+                    graphs[secId] = graph;
+                });
+            }
+        }
+        return graphs;
+    }
+
+
+    function Markers(provider) {
+        var depMarker = new H.map.Marker({lat:48.8567, lng:2.3508}, {
+            icon: NS.TRIP_START_ICON,
+            data: {"name": "dep"},
+        });
+        depMarker.draggable = true;
+
+        var arrMarker = new H.map.Marker({lat:48.8567, lng:2.3508}, {
+            icon: NS.TRIP_START_ICON,
+            data: {"name": "arr"},
+        });
+        arrMarker.draggable = true;
+        provider.map.addObjects([arrMarker, depMarker]);
+
+        provider.on("connection", function(conn) {
+            var dep = conn.Dep.Stn || conn.Dep.Addr;
+            var arr = conn.Arr.Stn || conn.Arr.Addr;
+            depMarker.setPosition({lat: dep.y, lng: dep.x});
+            arrMarker.setPosition({lat: arr.y, lng: arr.x});
+        });
+    }
+
+
+    NS.Mobility = Mobility;
+    NS.ui = NS.ui || {};
+    NS.ui.Logic = Logic;
+    NS.ui.Route = Route;
+    NS.ui.Markers = Markers;
+
+    NS.Mobility.routeStyles = {
+        21: { strokeColor: "black", lineWidth: 3, lineDash: [5, 5] },  // car
+        20: { strokeColor: "black", lineWidth: 5, lineDash: [1, 5]},                    // walk
+    }
+
+
+}(window.H = window.H || {}))
+```
+
+Now that you have the basics in place, you are ready for the big moment: Firing off a request to the HERE 
+Intermodal Routing API. The request will look like this:
 
 ```bash
 http://mobility.api.here.com/v1/route
@@ -126,6 +263,10 @@ http://mobility.api.here.com/v1/route
 The request parameters are the app ID and app code you set up earlier, the parameter `profile` you use to 
 specify you want a Park and Ride route, `dep` and `arr` to specify the coordinates of your start and end point,
 and a `time` for which you want the route to be calculated.
+
+If you look at the function `Mobility.prototype.route` above, you will see this request being assembled, 
+along with the parameters `graph` and `maneuvers`, which are needed if you want to visualize the returned route -
+if you don't want to know the geometry and maneuvers for the route, you can omit them.
 
 And here is (an edited version of) what the response will look like. Actually, you'll get a much longer 
 response, but we are limiting ourselves to the bits interesting for this tutorial. For a depiction of the 
@@ -189,20 +330,32 @@ from the documentation.
 The response gives us a JSON list of three `Connection` objects (of which only one is shown here), each of 
 which contains a list of `Sec` objects (again, we are only showing the first one). The `Sec` objects represent
 parts of the journey between which the vehicle is switched. Most importantly for us here, they also contain 
-the `Graph` object, which we will use to visualize the route on the map. < TODO LENE pending Torsten's actual
-code :-) >
+the `Graph` object, which we use to visualize the route on the map.
 
-Let's call the API from Javascript:
+Let's use our utility class to make a request to the HERE Intermodal Routing API and visualize the response.
+To the end of the `here.js` file, add this code:
 
-< TODO TORSTEN yeah, it's boring to repeat it in Javascript, but let's try to create a fully working app here :-) >
+```javascript
+var mobility = new H.Mobility({
+    map: map,
+    app_id: '{YOUR_APP_ID}', // // <-- ENTER YOUR APP ID HERE
+    app_code: '{YOUR_APP_CODE}', // <-- ENTER YOUR APP CODE HERE
+});
 
-Now finally we want our routing response nicely visualized on the map. 
+var ui = mobility.createDefaultUI();
 
-< TODO TORSTEN code visualizing the route >
-
+mobility.route({
+    dep: {YOUR_START_POINT},
+    arr: [41.844238,-87.638862],
+    time: '2018-02-01T07:30:00',
+    graph: 1,
+    maneuvers: 1
+});
+```
 And just with that you have requested and displayed a Park and Ride route on a map. 
 
 < TODO TORSTEN screenshot of visualized route (maybe with explanations?) >
+![HERE Map with PnR route to Chicago HERE office]( "HERE Map with PnR route to Chicago HERE office")
 
 Now you can go forth and modify the code to suit your needs! 
 
