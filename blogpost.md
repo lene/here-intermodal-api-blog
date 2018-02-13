@@ -48,7 +48,7 @@ So, let's go!
 To work with any HERE API, you need to get yourself a pair of **credentials**. They consist of an app id and 
 an app code. You can get your own set of credentials by signing up on [developer.here.com](http://developer.here.com).
 After signing up for our account you create a new application to generate an app ID and an app code. If you 
-have already signed up, you can access your credentials on your projects page. 
+have already signed up, you can access your credentials on your "Projects" page. 
 There's a 90-day Free Trial and also a free Public Plan available. Due to licensing issues, if you use one of 
 those, to use the Intermodal Routing API you must also contact the HERE Sales Team via the 
 [Contact Us](http://developer.here.com/contact-us) page and request < TODO LENE (pending Sales Team's response) 
@@ -58,23 +58,51 @@ your application to be allowed to use the Intermodal Routing API. >
 
 ## Finally: some code!
 
-Now that you have your HERE API credentials, you can go ahead and create a Javascript script to render a map:
+Now that you have your HERE API credentials, you can go ahead and create a Javascript script to render a map.
 
-< TODO TORSTEN code setting up the map - something along the lines of: >
+Of course, you must first create an HTML file to render you Javascript:
+
+```html
+<html>
+    <head>
+        <script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-core.js"></script>
+        <script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-mapevents.js"></script>
+        <script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-service.js"></script>
+        <script type="text/javascript" src="https://js.api.here.com/v3/3.0/mapsjs-ui.js"></script>
+        <script src="http://taser-dev.rnd.transit.api.here.com:8008/static/js/jquery.min.js"></script>
+    </head>
+    
+    <body>
+        <div id="map" style="height:800px"></div>
+        <script type="text/javascript" src="here.js"></script>
+    </body>
+</html>
+```
+Here we have included the basic [HERE JavaScript API](https://developer.here.com/develop/javascript-api) imports
+and also created a div where our map will be displayed. Then we are including the file `here.js`, which we are
+writing next:
+
 ```javascript
 var platform = new H.service.Platform({
-  app_id: '{YOUR_APP_ID}', // // <-- ENTER YOUR APP ID HERE
-  app_code: '{YOUR_APP_CODE}', // <-- ENTER YOUR APP CODE HERE
+    useCIT: true,
+    app_id: '{YOUR_APP_ID}', // // <-- ENTER YOUR APP ID HERE
+    app_code: '{YOUR_APP_CODE}', // <-- ENTER YOUR APP CODE HERE
+});
+var maptypes = platform.createDefaultLayers();
+
+var map = new H.Map(document.getElementById('map'), maptypes.terrain.map, {
+    zoom: 10,
+    center: { lat: 41.884238, lng: -87.638862 }
 });
 
-var defaultLayers = platform.createDefaultLayers();
-var mapPlaceholder = document.getElementById('map-container');
+var ui = H.ui.UI.createDefault(map, maptypes);
 
-var map = new H.Map(mapContainer, defaultLayers.normal.map);
-
-// ... (display the map)
+var mapevents = new H.mapevents.MapEvents(map);
+var behavior = new H.mapevents.Behavior(mapevents);
 ```
-
+Now you have set up a HERE map, centered at the HERE Chicago offices, which are located at 41.884238 degrees
+North, 87.638862 West. (See? You have already learned something!) It should look approximately like this:
+ 
 < TODO TORSTEN here goes a screenshot of your beautiful map >
 
 Let's just very quickly add in some code to select a point on the map to start our route from:
@@ -159,7 +187,7 @@ from the documentation.
 }
 ```
 The response gives us a JSON list of three `Connection` objects (of which only one is shown here), each of 
-which contains a list of `Sec` object (again, we are only showing the first one). The `Sec` objects represent
+which contains a list of `Sec` objects (again, we are only showing the first one). The `Sec` objects represent
 parts of the journey between which the vehicle is switched. Most importantly for us here, they also contain 
 the `Graph` object, which we will use to visualize the route on the map. < TODO LENE pending Torsten's actual
 code :-) >
