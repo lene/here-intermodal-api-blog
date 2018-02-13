@@ -1,22 +1,20 @@
 # Park and Ride Routing with the HERE Intermodal Routing API
 
-< TODO SOMEBODY ELSE nice title pic (I have no idea what) >
-
 As announced in the post [HERE launches Intermodal Routing API](http://developer.here.com/blog/here-launches-intermodal-routing-api), 
 HERE has recently released the Intermodal Routing API. Intermodal routing is a novel capability that allows
 users to find routes across different modes of transportation, such as combining air and ground travel, 
-rail and bike share, or public transit and taxi services. 
+rail and bike share, or public transit and taxi services.
 
 Current routing services can only route across a single mode of transport - for example, car routing, public 
-transit routing or bike routing. The possibility to combine modes really opens new possibilities. 
+transit routing or bike routing. The possibility to combine modes really opens new possibilities.
   
-One very common application for intermodal routing, which has been requested from HERE a lot, is Park and 
-Ride. Because of this, we have implemented Park and Ride routing as the first application of the Intermodal 
+One very common application for intermodal routing, which has been requested from HERE a lot, is Park and
+Ride. Because of this, we have implemented Park and Ride routing as the first application of the Intermodal
 Routing API. With it you can do things ranging from calculating your personal best route to reach your office 
 using Park and Ride, via showing customers a map with comfortable Park and Ride solutions to reach your 
-company headquarters in a congested city, to < TODO LENE come up with an enterprise-scale example >.
+company headquarters in a congested city, to offering a fully flexible Park and Ride Routing solution.
 
-Please note that HERE is offering Park and Ride Routing only in specific locations, see the 
+Please note that HERE is offering Park and Ride Routing only in specific locations, see the
 [Coverage Information](http://developer.here.com/documentation/park-and-ride/topics/coverage-information.html)
 for currently supported cities. This list of supported cities is growing as we collect the necessary data for
 more and more destinations.
@@ -38,23 +36,21 @@ tutorial for the HERE Maps Javascript API:
 * [Part 7: Traffic](http://developer.here.com/blog/who-wants-ice-cream-a-here-maps-api-for-javascript-tutorial-part-7-traffic) 
 * [Part 8: Wrapping Up](http://developer.here.com/blog/who-wants-ice-cream-a-here-maps-api-for-javascript-tutorial-part-8-wrapping-up)
 
-In this tutorial we will create a Javascript program that displays a map of Chicago and lets you select a 
-start point, from where a Park and Ride route to the HERE offices in Chicago, which is situated at the 
-coordinates 41.884238/-87.638862, is calculated. It should be easy for you to choose a different destination,
-or extend the script so you can select both origin and destination for your journey freely. 
+In this tutorial we will create a Javascript program that displays a map of Chicago and, from a start point you 
+choose, calculates a Park and Ride route to the HERE offices in Chicago. It should be easy for you to choose a 
+different destination, or extend the script so you can select both origin and destination for your journey freely. 
 
 So, let's go! 
 
-To work with any HERE API, you need to get yourself a pair of **credentials**. They consist of an app id and 
+To work with any HERE API, you need to get yourself a pair of **credentials**. They consist of an app id and
 an app code. You can get your own set of credentials by signing up on [developer.here.com](http://developer.here.com).
-After signing up for our account you create a new application to generate an app ID and an app code. If you 
-have already signed up, you can access your credentials on your "Projects" page. 
-There's a 90-day Free Trial and also a free Public Plan available. Due to licensing issues, if you use one of 
-those, to use the Intermodal Routing API you must also contact the HERE Sales Team via the 
-[Contact Us](http://developer.here.com/contact-us) page and request < TODO LENE (pending Sales Team's response) 
-that your application is enabled for the Intermodal Routing API. Please state that you are not a public 
-transit company in order to circumvent the licensing restrictions. It should take no more than XXXX hours for 
-your application to be allowed to use the Intermodal Routing API. >
+After signing up for our account you create a new application to generate an app ID and an app code. If you
+have already signed up, you can access your credentials on your "Projects" page.
+There's a 90-day Free Trial and also a free Public Plan available. Due to licensing issues, if you use one of
+those, to use the Intermodal Routing API you must also contact the HERE Sales Team via the
+[Contact Us](https://developer.here.com/contact-us#contact-sales) page and request that your application is
+enabled for the Intermodal Routing API. It can take up to three days for your application to be allowed to use 
+the Intermodal Routing API.
 
 ## Finally: some code!
 
@@ -106,16 +102,15 @@ North, 87.638862 West. (See? You have already learned something!) It should look
  
 ![HERE Map centered on Chicago HERE office](https://deveo.in.here.com/api/blob?path=assets%2FHERE_map_bare.png&project_id=db99b593-8bec-4d6b-8844-bf54a047c112&repository_id=c669597b-1c49-4962-b03f-867ab531efdb&id=master&account_key=808a2d6fb2fb665cea48a52ecf1c2ae9&company_key=ac27767297dbdbe784acb2bf0805d820&plugin_key=3c94d47d6257ca0d3bc54a9b6a91aa64 "HERE Map centered on Chicago HERE office")
 
-Since it is out of scope of this tutorial to explain how to process and render a route (the HERE Maps 
-Javascript API tutorial is covering that), I'll just give you some code which takes care of that.  
+Since it is out of scope of this tutorial to explain how to process and render a route (the HERE Maps
+Javascript API tutorial is covering that), I'll just give you some code which takes care of that.
 Let's just very quickly add in some code to select a point on the map to start our route from. Copy it and
 save it to the file `tools.js`, which, you may have noticed, we are already including in the HTML file above:
 ```javascript
 (function(NS) {
 
-    var ACCESS_ID = "bb072ce65aa1ad322c116b828fb1a226",
-        APP_ID: 'xWb5KmTI7pgCAFxf9d9P',
-        APP_CODE: 'DNMfZLpeUUiLYolfwWKK9A'
+    var APP_ID: '{YOUR_APP_ID}', // // <-- ENTER YOUR APP ID HERE
+        APP_CODE: '{YOUR_APP_CODE}'; // <-- ENTER YOUR APP CODE HERE
 
     function Mobility(options) {
         this.map = options.map;
@@ -210,17 +205,15 @@ save it to the file `tools.js`, which, you may have noticed, we are already incl
 
 
     function Markers(provider) {
-        var depMarker = new H.map.Marker({lat:48.8567, lng:2.3508}, {
+        var depMarker = new H.map.Marker({lat: 0, lng:0}, {
             icon: NS.TRIP_START_ICON,
             data: {"name": "dep"},
         });
-        depMarker.draggable = true;
 
-        var arrMarker = new H.map.Marker({lat:48.8567, lng:2.3508}, {
+        var arrMarker = new H.map.Marker({lat: 0, lng: 0}, {
             icon: NS.TRIP_START_ICON,
             data: {"name": "arr"},
         });
-        arrMarker.draggable = true;
         provider.map.addObjects([arrMarker, depMarker]);
 
         provider.on("connection", function(conn) {
@@ -240,14 +233,14 @@ save it to the file `tools.js`, which, you may have noticed, we are already incl
 
     NS.Mobility.routeStyles = {
         21: { strokeColor: "black", lineWidth: 3, lineDash: [5, 5] },  // car
-        20: { strokeColor: "black", lineWidth: 5, lineDash: [1, 5]},                    // walk
+        20: { strokeColor: "black", lineWidth: 5, lineDash: [1, 5]},   // walk
     }
 
 
 }(window.H = window.H || {}))
 ```
 
-Now that you have the basics in place, you are ready for the big moment: Firing off a request to the HERE 
+Now that you have the basics in place, you are ready for the big moment: Firing off a request to the HERE
 Intermodal Routing API. The request will look like this:
 
 ```bash
@@ -264,13 +257,13 @@ The request parameters are the app ID and app code you set up earlier, the param
 specify you want a Park and Ride route, `dep` and `arr` to specify the coordinates of your start and end point,
 and a `time` for which you want the route to be calculated.
 
-If you look at the function `Mobility.prototype.route` above, you will see this request being assembled, 
+If you look at the function `Mobility.prototype.route` above, you will see this request being assembled,
 along with the parameters `graph` and `maneuvers`, which are needed if you want to visualize the returned route -
 if you don't want to know the geometry and maneuvers for the route, you can omit them.
 
-And here is (an edited version of) what the response will look like. Actually, you'll get a much longer 
+And here is (an edited version of) what the response will look like. Actually, you'll get a much longer
 response, but we are limiting ourselves to the bits interesting for this tutorial. For a depiction of the 
-full response, see the 
+full response, see the
 [Park and Ride Routing Example](http://developer.here.com/documentation/park-and-ride/topics/examples-routing.html)
 from the documentation.  
 
@@ -329,7 +322,7 @@ from the documentation.
 ```
 The response gives us a JSON list of three `Connection` objects (of which only one is shown here), each of 
 which contains a list of `Sec` objects (again, we are only showing the first one). The `Sec` objects represent
-parts of the journey between which the vehicle is switched. Most importantly for us here, they also contain 
+parts of the journey between which the vehicle is switched. Most importantly for us here, they also contain
 the `Graph` object, which we use to visualize the route on the map.
 
 Let's use our utility class to make a request to the HERE Intermodal Routing API and visualize the response.
@@ -338,32 +331,35 @@ To the end of the `here.js` file, add this code:
 ```javascript
 var mobility = new H.Mobility({
     map: map,
-    app_id: '{YOUR_APP_ID}', // // <-- ENTER YOUR APP ID HERE
-    app_code: '{YOUR_APP_CODE}', // <-- ENTER YOUR APP CODE HERE
+    app_id: '{YOUR_APP_ID}',  // <-- ENTER YOUR APP ID HERE
+    app_code: '{YOUR_APP_CODE}',  // <-- ENTER YOUR APP CODE HERE
 });
 
 var ui = mobility.createDefaultUI();
 
 mobility.route({
-    dep: {YOUR_START_POINT},
+    dep: {YOUR_START_POINT},  // <-- ENTER YOUR START POINT HERE
     arr: [41.844238,-87.638862],
     time: '2018-02-01T07:30:00',
     graph: 1,
     maneuvers: 1
 });
 ```
-And just with that you have requested and displayed a Park and Ride route on a map. 
+And just with that you have requested and displayed a Park and Ride route on a map. Your result, depending on 
+the start point you use, should look something like this:
 
-< TODO TORSTEN screenshot of visualized route (maybe with explanations?) >
-![HERE Map with PnR route to Chicago HERE office]( "HERE Map with PnR route to Chicago HERE office")
+![HERE Map with PnR route to Chicago HERE office](https://deveo.in.here.com/api/blob?path=assets%2FHERE_map_PnR.png&project_id=db99b593-8bec-4d6b-8844-bf54a047c112&repository_id=c669597b-1c49-4962-b03f-867ab531efdb&id=master&account_key=808a2d6fb2fb665cea48a52ecf1c2ae9&company_key=ac27767297dbdbe784acb2bf0805d820&plugin_key=3c94d47d6257ca0d3bc54a9b6a91aa64 "HERE Map with PnR route to Chicago HERE office")
 
 Now you can go forth and modify the code to suit your needs! 
 
 ## Summary
 
-We have implemented a map doing Park and Ride Routing in < TODO XXX > lines of code, but of course there is 
-more to it. The [Intermodal Routing API Documentation](http://developer.here.com/documentation/park-and-ride/)
-is there to help you. Or, if you run into a problem the documentation cannot solve, try asking on
-[Stack Overflow](https://stackoverflow.com/questions/tagged/here-api).
+We have implemented a map doing Park and Ride Routing in about 180 lines of code, most of which is needed to
+visualize the route. But of course there is more to it. The 
+[Intermodal Routing API Documentation](http://developer.here.com/documentation/park-and-ride/) is there to 
+help you. For more general questions how to use the HERE Javascript API, refer to the 
+[HERE JavaScript API](https://developer.here.com/develop/javascript-api) documentation or the eight-part tutorial
+Linked above. Finally, if you run into a problem the documentation cannot solve, try asking questions on
+[Stack Overflow](https://stackoverflow.com/questions/tagged/here-api). 
 
 Happy coding!
