@@ -41,8 +41,6 @@
         provider.on("response", function(resp) {
             console.log(resp);
             provider.emit("connection", resp.Res.Connections.Connection[0], resp.Res.Guidance && resp.Res.Guidance.Maneuvers);
-//            provider.emit("connection", resp.Res.Connections.Connection[1], resp.Res.Guidance && resp.Res.Guidance.Maneuvers);
-//            provider.emit("connection", resp.Res.Connections.Connection[2], resp.Res.Guidance && resp.Res.Guidance.Maneuvers);
         });
     }
 
@@ -97,17 +95,15 @@
 
 
     function Markers(provider) {
-        var depMarker = new H.map.Marker({lat:48.8567, lng:2.3508}, {
+        var depMarker = new H.map.Marker({lat: 0, lng: 0}, {
             icon: NS.TRIP_START_ICON,
             data: {"name": "dep"},
         });
-        depMarker.draggable = true;
 
-        var arrMarker = new H.map.Marker({lat:48.8567, lng:2.3508}, {
+        var arrMarker = new H.map.Marker({lat: 0, lng: 0}, {
             icon: NS.TRIP_START_ICON,
             data: {"name": "arr"},
         });
-        arrMarker.draggable = true;
         provider.map.addObjects([arrMarker, depMarker]);
 
         provider.on("connection", function(conn) {
@@ -127,7 +123,7 @@
 
     NS.Mobility.routeStyles = {
         21: { strokeColor: "black", lineWidth: 3, lineDash: [5, 5] },  // car
-        20: { strokeColor: "black", lineWidth: 5, lineDash: [1, 5]},                    // walk
+        20: { strokeColor: "black", lineWidth: 5, lineDash: [1, 5]},   // walk
     }
 
 
