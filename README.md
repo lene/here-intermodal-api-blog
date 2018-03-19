@@ -107,8 +107,8 @@ save it to the file `tools.js`, which, you may have noticed, we are already incl
 ```javascript
 (function(NS) {
 
-    var APP_ID: '{YOUR_APP_ID}', // // <-- ENTER YOUR APP ID HERE
-        APP_CODE: '{YOUR_APP_CODE}'; // <-- ENTER YOUR APP CODE HERE
+    var APP_ID = '{YOUR_APP_ID}', // // <-- ENTER YOUR APP ID HERE
+        APP_CODE = '{YOUR_APP_CODE}'; // <-- ENTER YOUR APP CODE HERE
 
     function Mobility(options) {
         this.map = options.map;
@@ -248,7 +248,7 @@ http://mobility.api.here.com/v1/route
   &profile=parkandride
   &dep={YOUR_START_POINT}
   &arr=41.884238,-87.638862
-  &time=2018-03-08T07:30:00
+  &time=2018-03-19T07:30:00
 ```
 
 The request parameters are the App ID and App Code you set up earlier, the parameter `profile` you use to 
@@ -318,6 +318,8 @@ from the documentation.
   }
 }
 ```
+NB: If you get an error back that says "Date outside the timetable period", the timetable data of at least one public transit provider in the area is not present - either expired, if the date is in the past, or not yet present, if it is in the future. Please adjust the `time` parameter in the request to be closer to the present date.
+
 The response gives us a JSON list of three `Connection` objects (of which only one is shown here), each of 
 which contains a list of `Sec` objects (again, we are only showing the first one). The `Sec` objects represent
 parts of the journey between which the vehicle is switched. Most importantly for us here, they also contain
